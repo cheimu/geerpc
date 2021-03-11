@@ -142,4 +142,6 @@ func (server *Server) Accept(lis net.Listener) {
 var DefaultServer = NewServer()
 
 // Accept is wrapper of server's Accept
-func Accept(lis net.Listener) { DefaultServer.Accept(lis) }
+func Accept(lis net.Listener) {
+	DefaultServer.Accept(lis)
+}

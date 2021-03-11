@@ -1,6 +1,8 @@
 package codec
 
-import "io"
+import (
+	"io"
+)
 
 // Header includes method name, sequence number and ther error
 type Header struct {
