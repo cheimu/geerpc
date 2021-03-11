@@ -16,7 +16,7 @@ Client side
 3. `net.Dial`<br>
 4. sleep (wait for dailing finished)
 5. send Option
-6. NewGobCodec()
+6. `NewGobCodec()`
 7. Prepare Header
 8. Write<br>
    |<br>
@@ -31,6 +31,6 @@ Client side
    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|--- server side `server.handleRequest()`<br>
    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|--- server side `server.SendResponse())`<br>
    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|--- server side `GobCodec.Write()`<br>
-9. GobCodec.ReadHeader()
-10. GobCodec.ReadBody()
+9. `GobCodec.ReadHeader()`
+10. `GobCodec.ReadBody()`
 11. `conn.Close()`
