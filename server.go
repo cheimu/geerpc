@@ -1,13 +1,13 @@
-package server
+package geerpc
 
 import (
 	"encoding/json"
 	"fmt"
+	"geerpc/codec"
 	"io"
 	"log"
 	"net"
 	"reflect"
-	"rpc/codec"
 	"sync"
 )
 

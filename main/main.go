@@ -1,12 +1,11 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
+	"geerpc"
 	"log"
 	"net"
-	"rpc/codec"
-	"rpc/server"
+	"sync"
 	"time"
 )
 
@@ -18,7 +17,7 @@ func startServer(addr chan string) {
 	log.Println("start rpc server on", l.Addr())
 	// send the listerer's ip address into the channel
 	addr <- l.Addr().String()
-	server.Accept(l)
+	geerpc.Accept(l)
 }
 
 func main() {
@@ -27,22 +26,24 @@ func main() {
 	go startServer(addr)
 
 	// dail and <-addr will get the ip address which already stored in channel when start server
-	conn, _ := net.Dial("tcp", <-addr)
-	defer func() { _ = conn.Close() }()
+	client, _ := geerpc.Dial("tcp", <-addr)
+	defer func() { _ = client.Close() }()
 
 	// wait to dail
 	time.Sleep(time.Second)
-	_ = json.NewEncoder(conn).Encode(server.DefaultOption)
-	cc := codec.NewGobCodec(conn)
+	var wg sync.WaitGroup
 	for i := 0; i < 5; i++ {
-		h := &codec.Header{
-			ServiceMethod: "Foo.Sum",
-			Seq:           uint64(i),
-		}
-		_ = cc.Write(h, fmt.Sprintf("rpc req %d", h.Seq))
-		_ = cc.ReadHeader(h)
-		var reply string
-		_ = cc.ReadBody(&reply)
-		log.Println("reply:", reply)
+		wg.Add(1)
+		go func(i int) {
+			defer wg.Done()
+			args := fmt.Sprintf("geerpc req %d", i)
+			var reply string
+			if err := client.Call("Foo.Sum", args, &reply); err != nil {
+				log.Fatal("call Foo.Sum error:", err)
+				log.Println("reply:", reply)
+			}
+			log.Println("reply:", reply)
+		}(i)
 	}
+	wg.Wait()
 }
