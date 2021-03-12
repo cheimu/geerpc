@@ -13,8 +13,8 @@ Client side
    |--- server side `server.Accept()`<br>
    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|--- server side `DefaultServer.Accept()`<br>
    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|--- server side `server.ServeConn()`(STAY HERE) <br> 
-3. `net.Dial`<br>
-4. sleep (wait for dailing finished)
+3. `net.Dial()`<br>
+4. sleep (wait until connection built by `net.Dail()`)
 5. send Option
 6. `NewGobCodec()`
 7. Prepare Header
