@@ -42,4 +42,8 @@ Client side
 2. Send: <br>
 WaitGroup's things, `Add()`, `Done()` and `Wait()`, and `go client.Call()` -> `client.Go()` -> `client.send()` -> `client.registerCall()` and `client.cc.Write(&client.header, call.Args)`
 
-## Day 2: Service Call using Reflect <br> ## 
+## Day 3: Service Call using Reflect <br> ## 
+Places that needs modification<br>
+1. `startServer()` -> `geerpc.Register(&service_name)` -> `server.Register()` -> `newServer()` -> `service.registerMethods()` -> check `isExportedOrBuiltinType()`
+2. `server.ReadRequest()` -> `req.svc, req.mtype, err = server.findService(h.ServiceMethod)`, `req.argv = req.mtype.newArgv()`, `req.replyv = req.mtype.newReplyv()`, `argvi := req.argv.Interface()` and finally `cc.ReadBody(argvi)`
+3. `server.handleRequest()` -> `req.svc.call(req.mtype, req.argv, req.replyv)` -> `service.call()`
