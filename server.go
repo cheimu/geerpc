@@ -193,8 +193,9 @@ func (server *Server) findService(serviceMethod string) (svc *service, mtype *me
 		err = errors.New("rpc server: can't find service " + serviceName)
 		return
 	}
-	// interface{}.type
-	// here is instance.xxx_service_ptr
+	// variable.(T): type assertion. Assert the type and get the value
+	// If variable is not an interface, it will asserts that the dynamic type of x is identical to T
+	// If variable is an interface, it asserts that the dynamic type of x implements T.
 	svc = svci.(*service)
 	mtype = svc.method[methodName]
 	if mtype == nil {
