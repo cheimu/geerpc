@@ -2,7 +2,7 @@
 Implementation of a simple remote procedure call <br>
 Reference: https://github.com/geektutu/7days-golang/tree/master/gee-rpc
 
-## Day 1:<br> ##
+## Day 1: Runnable RPC Framework<br> ##
 Initialization<br>
 `codec.init()` and `NewServer()` <br>
 Client side
@@ -34,3 +34,10 @@ Client side
 9. `GobCodec.ReadHeader()`
 10. `GobCodec.ReadBody()`
 11. `conn.Close()`
+
+## Day 2: Concurrent Client Side ##<br> 
+`Main()`<br>
+1. Create client instance and Receive: <br>
+client = geerpc.Dail() -> `client.NewClient()` -> send option and `client.newClientCodec()` -> `go client.receive()` and return client -> `client.cc.ReadHeader()` then `client.removeCall()`, then `client.cc.ReadBody()`, and finally `client.terminateCalls()`<br>
+2. Send: <br>
+WaitGroup's things, `Add()`, `Done()` and `Wait()`, and `client.Call()` -> `client.Go()` -> `client.send()` -> `client.registerCall()` and `client.cc.Write(&client.header, call.Args)`
