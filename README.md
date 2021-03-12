@@ -35,7 +35,7 @@ Client side
 10. `GobCodec.ReadBody()`
 11. `conn.Close()`
 
-## Day 2: Concurrent Client Side ##<br> 
+## Day 2: Concurrent Client Side <br> ## 
 `Main()`<br>
 1. Create client instance and Receive: <br>
 client = geerpc.Dail() -> `client.NewClient()` -> send option and `client.newClientCodec()` -> `go client.receive()` and return client -> `client.cc.ReadHeader()` then `client.removeCall()`, then `client.cc.ReadBody()`, and finally `client.terminateCalls()`<br>
