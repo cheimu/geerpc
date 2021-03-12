@@ -40,4 +40,4 @@ Client side
 1. Create client instance and Receive: <br>
 client = geerpc.Dail() -> `client.NewClient()` -> send option and `client.newClientCodec()` -> `go client.receive()` and return client -> `client.cc.ReadHeader()` then `client.removeCall()`, then `client.cc.ReadBody()`, and finally `client.terminateCalls()`<br>
 2. Send: <br>
-WaitGroup's things, `Add()`, `Done()` and `Wait()`, and `client.Call()` -> `client.Go()` -> `client.send()` -> `client.registerCall()` and `client.cc.Write(&client.header, call.Args)`
+WaitGroup's things, `Add()`, `Done()` and `Wait()`, and `go client.Call()` -> `client.Go()` -> `client.send()` -> `client.registerCall()` and `client.cc.Write(&client.header, call.Args)`
