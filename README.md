@@ -47,3 +47,22 @@ Places that need modification<br>
 1. `startServer()` -> `geerpc.Register(&service_name)` -> `server.Register()` -> `newServer()` -> `service.registerMethods()` -> check `isExportedOrBuiltinType()`
 2. `server.ReadRequest()` -> `req.svc, req.mtype, err = server.findService(h.ServiceMethod)`, `req.argv = req.mtype.newArgv()`, `req.replyv = req.mtype.newReplyv()`, `argvi := req.argv.Interface()` and finally `cc.ReadBody(argvi)`
 3. `server.handleRequest()` -> `req.svc.call(req.mtype, req.argv, req.replyv)` -> `service.call()`
+
+## Day 4 Handle Timeouts <br> ##
+__The technique here is setup a signal and its channel, and use select to check. if `case <-timeout_channel` happened first means timeouts; if signal happened first means no timeouts.__<br>
+
+_For Client side timeouts_: <br>
+1. Setup connection to server timeouts: <br>
+`Dial()` -> `client.dailTimeout()` -> `conn, err := net.DialTimeout()` and `client, err := f(conn, opt), ch <- clientResult{client: client, err: err}`. Then do select technique described above using `time.After(opt.ConnectTimeout)`
+2. Send request timeouts &
+3. Wait for response too long got timeoutsand &
+4. Receive response got timeouts : <br>
+In `Call()` use `ctx context.Context`. Do select technique described above using `ctx-Done()` 
+
+_For Server side timeouts_:<br>
+1. when receive request &
+2. when call services &
+3. when send request:<br>
+In `server.handleRequest()` uses two signals, `called` and `sent`. `called` indicates that started a goroutine to call and `req.svc.call(req.mtype, req.argv, req.replyv)` is executed but `server.sendResponse()` isn't, while `sent` incidates `server.sendResponse()` is executed.<br>
+Then do select technique described above using `time.After(timeout)`
+
