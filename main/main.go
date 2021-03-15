@@ -5,6 +5,7 @@ import (
 	"geerpc"
 	"log"
 	"net"
+	"net/http"
 	"sync"
 	"time"
 )
@@ -19,34 +20,34 @@ func (f Foo) Sum(args Args, reply *int) error {
 	return nil
 }
 
-func startServer(addr chan string) {
+func startServer(addrCh chan string) {
 	var foo Foo
 	// register service
 	if err := geerpc.Register(&foo); err != nil {
 		log.Fatal("register error:", err)
 	}
 	// listen
-	l, err := net.Listen("tcp", ":0")
+	l, err := net.Listen("tcp", ":9999")
 	if err != nil {
 		log.Fatal("network error:", err)
 	}
 	log.Println("start rpc server on", l.Addr())
+	// Now assume it is a http server
+	geerpc.HandleHTTP()
 	// send the listerer's ip address into the channel
-	addr <- l.Addr().String()
-	geerpc.Accept(l)
+	addrCh <- l.Addr().String()
+	// geerpc.Accept(l)
+	_ = http.Serve(l, nil)
 }
 
-func main() {
-	log.SetFlags(0)
-	addr := make(chan string)
-	go startServer(addr)
-
-	// dail and <-addr will get the ip address which already stored in channel when start server
-	client, _ := geerpc.Dial("tcp", <-addr)
+func call(addrCh chan string) {
+	// dial and <-addr will get the ip address which already stored in channel when start server
+	client, _ := geerpc.XDial("http@" + <-addrCh)
 	defer func() { _ = client.Close() }()
 
 	// wait to dail
 	time.Sleep(time.Second)
+	// send request & receive response
 	var wg sync.WaitGroup
 	for i := 0; i < 5; i++ {
 		wg.Add(1)
@@ -61,4 +62,11 @@ func main() {
 		}(i)
 	}
 	wg.Wait()
+}
+
+func main() {
+	log.SetFlags(0)
+	ch := make(chan string)
+	go call(ch)
+	startServer(ch)
 }

@@ -3,6 +3,8 @@ package geerpc
 import (
 	"context"
 	"net"
+	"os"
+	"runtime"
 	"strings"
 	"testing"
 	"time"
@@ -65,4 +67,28 @@ func TestClient_Call(t *testing.T) {
 		err := client.Call(context.Background(), "Bar.Timeout", 1, &reply)
 		_assert(err != nil && strings.Contains(err.Error(), "handle timeout"), "expect a timeout error")
 	})
+}
+
+func TestXDial(t *testing.T) {
+	if runtime.GOOS == "linux" {
+		ch := make(chan struct{})
+		errs := make(chan error, 1)
+		addr := "/tmp/geerpc.sock"
+		go func() {
+			_ = os.Remove(addr)
+			l, err := net.Listen("unix", addr)
+
+			errs <- err
+
+			ch <- struct{}{}
+			Accept(l)
+		}()
+		err := <-errs
+		if err != nil {
+			t.Fatal("failed to listen unix socket")
+		}
+		<-ch
+		_, err = XDial("unix@" + addr)
+		_assert(err == nil, "failed to connect unix socket")
+	}
 }

@@ -8,6 +8,7 @@ import (
 	"io"
 	"log"
 	"net"
+	"net/http"
 	"reflect"
 	"strings"
 	"sync"
@@ -194,7 +195,13 @@ func Accept(lis net.Listener) {
 	DefaultServer.Accept(lis)
 }
 
-/* Service Related */
+/*
+
+
+	Service Related
+
+
+*/
 func (server *Server) Register(rcvr interface{}) error {
 	s := newService(rcvr)
 	if _, dup := server.serviceMap.LoadOrStore(s.name, s); dup {
@@ -232,4 +239,54 @@ func (server *Server) findService(serviceMethod string) (svc *service, mtype *me
 		err = errors.New("rpc server: can't find method " + methodName)
 	}
 	return svc, mtype, nil
+}
+
+/*
+
+	Handle HTTP
+
+*/
+const (
+	connected        = "200 Connected to Gee RPC"
+	defaultRPCPath   = "/_geeprc_"
+	defaultDebugPath = "/debug/geerpc"
+)
+
+// ServeHTTP implements an http.Handler that answers RPC requests.
+func (server *Server) ServeHTTP(w http.ResponseWriter, req *http.Request) {
+	if req.Method != "CONNECT" {
+		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		// WriteBody
+		_, _ = io.WriteString(w, "405 must CONNECT\n")
+		return
+	}
+	conn, _, err := w.(http.Hijacker).Hijack()
+	if err != nil {
+		log.Print("rpc hijacking ", req.RemoteAddr, " got error: ", err.Error())
+		return
+	}
+	// send HTTP/1.0 200 Connected to Gee RPC
+	_, _ = io.WriteString(conn, "HTTP/1.0 "+connected+"\n\n")
+	server.ServeConn(conn)
+}
+
+// HandleHTTP registers an HTTP handler for RPC messages on rpcPath.
+/*
+	func http.Handle(pattern string, handler http.Handler)
+	and
+	type Handler interface {
+   		ServeHTTP(w ResponseWriter, r *Request)
+	}
+	so server needs to implement ServerHTTP
+*/
+func (server *Server) HandleHTTP() {
+	http.Handle(defaultRPCPath, server)
+	http.Handle(defaultDebugPath, debugHTTP{server})
+	log.Println("rpc server debug path:", defaultDebugPath)
+}
+
+// HandleHTTP will let default server register the HTTP handlers
+func HandleHTTP() {
+	DefaultServer.HandleHTTP()
 }
