@@ -48,7 +48,7 @@ Places that need modification<br>
 2. `server.ReadRequest()` -> `req.svc, req.mtype, err = server.findService(h.ServiceMethod)`, `req.argv = req.mtype.newArgv()`, `req.replyv = req.mtype.newReplyv()`, `argvi := req.argv.Interface()` and finally `cc.ReadBody(argvi)`
 3. `server.handleRequest()` -> `req.svc.call(req.mtype, req.argv, req.replyv)` -> `service.call()`
 
-## Day 4 Handle Timeouts <br> ##
+## Day 4: Handle Timeouts <br> ##
 __The technique here is setup a signal and its channel, and use select to check. if `case <-timeout_channel` happened first means timeouts; if signal happened first means no timeouts.__<br>
 
 _For Client side timeouts_: <br>
@@ -65,4 +65,13 @@ _For Server side timeouts_:<br>
 3. when send request:<br>
 In `server.handleRequest()` uses two signals, `called` and `sent`. `called` indicates that started a goroutine to call and `req.svc.call(req.mtype, req.argv, req.replyv)` is executed but `server.sendResponse()` isn't, while `sent` incidates `server.sendResponse()` is executed.<br>
 Then do select technique described above using `time.After(timeout)`
+
+## Day 5: Handle Timeouts <br> ##
+The idea is Client side treats server as HTTP server and send `CONNECT` request, then Server side will return a HTTP response to indicate the success of connection. Then each message in HTTP will be hijacked by GeeRPC and executed.<br>
+Then when dial, call `XDial()` which will choose to `DialHTTP()` or `Dial()`
+
+`main()`<br>
+        &nbsp;&nbsp;|<br>
+        &nbsp;&nbsp;|->`startServer()` -> `handleHTTP()` -> `DefaultServer.handleHTTP()`->`http.Handle(defaultRPCPath, server)` and `http.Handle(defaultDebugPath, debugHTTP{server})` -> `server.ServeHTTP()` and `debugHTTP.ServeHTTP()` <br>
+        &nbsp;&nbsp;|-> `go call()` -> `XDial("http@" + <-addrCh)`
 
