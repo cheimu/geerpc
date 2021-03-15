@@ -67,6 +67,7 @@ func call(addrCh chan string) {
 func main() {
 	log.SetFlags(0)
 	ch := make(chan string)
+	// Why is this order? Why can't call startServer() first?
 	go call(ch)
 	startServer(ch)
 }
