@@ -43,6 +43,7 @@ func (m *methodType) newArgv() reflect.Value {
 func (m *methodType) newReplyv() reflect.Value {
 	replyv := reflect.New(m.ReplyType.Elem())
 	switch m.ReplyType.Elem().Kind() {
+	// why?
 	case reflect.Map:
 		replyv.Elem().Set(reflect.MakeMap(m.ReplyType.Elem()))
 	case reflect.Slice:
