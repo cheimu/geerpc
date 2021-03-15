@@ -67,7 +67,22 @@ func call(addrCh chan string) {
 func main() {
 	log.SetFlags(0)
 	ch := make(chan string)
-	// Why is this order? Why can't call startServer() first?
+	/* Why is this order? Why can't call startServer() first?
+	Because we need keep running the process to make debug webpage online, and
+	startServer(ch) will call handleHTTP() and will run the debug.ServeHTTP() forever,
+	so need to use goroutine to run call(), and call startServer() in the end;
+
+	If you Switch the order like following:
+		startServer(ch)
+		go call(ch)
+	then call(ch) will never be called, because startServer(ch) will run all the time
+
+	you can do following instead:
+		go startServer(ch)
+		go call(ch)
+		time.Sleep(5 * time.Second)
+	This will also work
+	*/
 	go call(ch)
 	startServer(ch)
 }
