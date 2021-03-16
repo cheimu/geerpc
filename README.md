@@ -82,7 +82,7 @@ Then when dial, call `XDial()` which will choose to `DialHTTP()` or `Dial()`
         &nbsp;&nbsp;|->`xc := xclient.NewXClient(d, xclient.<load_balancing_mode>, nil)`<br>
         
 __For single call__: <br>
-`xc.Call()` -> `rpcAddr, err := sc.d.Get(<load_balancing_mode>)` then `xc.call(rpcAddr)` -> `xc.dial(rpcAddr, ctx, serviceMethod, args, Reply)` -> in `client = XDial(rpcAddr, xc.opt)` then `client.Call()` <br>
+`xc.Call()` -> `rpcAddr, err := sc.d.Get(<load_balancing_mode>)` then `xc.call(rpcAddr)` -> `xc.dial(rpcAddr, ctx, serviceMethod, args, Reply)` -> `client = XDial(rpcAddr, xc.opt)` then `client.Call()` <br>
 __For broadcast__: <br>
 `xc.Broadcast()` -> `servers, err := xc.d.GetAll()`, then for each server in servers: if `reply` is not nil: `clonedReply = reflect.New(reflect.ValueOf(reply).Elem().Type()).Interface()`, `xc.call(rpcAddr, ctx, serviceMethod, args, clonedReply)`, and `reflect.ValueOf(reply).Elem().Set(reflect.ValueOf(clonedReply).Elem())`
 
