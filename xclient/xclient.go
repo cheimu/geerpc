@@ -75,6 +75,8 @@ func (xc *XClient) dial(rpcAddr string) (*Client, error) {
 }
 
 // Broadcast invokes the named function for every server registered in discovery
+// if one of instances got error, then return one of errors
+// if one of instances called successfully, then return one of result
 func (xc *XClient) Broadcast(ctx context.Context, serviceMethod string, args, reply interface{}) error {
 	servers, err := xc.d.GetAll()
 	if err != nil {
@@ -84,6 +86,7 @@ func (xc *XClient) Broadcast(ctx context.Context, serviceMethod string, args, re
 	var mu sync.Mutex // protect e and replyDone
 	var e error
 	replyDone := reply == nil // if reply is nil, don't need to set value
+	// if one call got error, then use cancel() to timeout immediately
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 	//defer cancel()
