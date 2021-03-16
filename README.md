@@ -87,3 +87,21 @@ __For single call__: <br>
 __For broadcast__: <br>
 `xc.Broadcast()` -> `servers, err := xc.d.GetAll()`, then for each server in servers: if `reply` is not nil: `clonedReply = reflect.New(reflect.ValueOf(reply).Elem().Type()).Interface()`, `xc.call(rpcAddr, ctx, serviceMethod, args, clonedReply)`, and `reflect.ValueOf(reply).Elem().Set(reflect.ValueOf(clonedReply).Elem())`
 
+## Day 7: Service Registry Center <br> ##
+
+`main()`<br>
+        &nbsp;&nbsp;|<br>
+        &nbsp;&nbsp;|->`go startRegistry(&wg)` -> `registry.HandleHTTP()` -> `DefaultGeeRegister.HandleHTTP defaultPath)` -> `http.Handle(registryPath, r)` -> `GeeRegistry.ServeHTTP()` -> case "GET": `w.Header().Set("X-Geerpc-Servers", strings.Join(r.aliveServers(), ","))` case "POST": `r.putServer(req.Header.Get("X-Geerpc-Server"))` <br>
+        &nbsp;&nbsp;|->`go startServer()` -> `server := geerpc.NewServer()`, `err := server.Register(&foo)`, and `registry.Heartbeat(registryAddr, "tcp@"+l.Addr().String(), 0)` -> `registry.Heartbeat()` -> while true: `sendHeartbeat(registry, addr)` -> `req, _ := http.NewRequest("POST", registry, nil)` <br>
+
+__For single call__: <br>
+`xc.Call()` <br>
+&nbsp;&nbsp;|<br>
+&nbsp;&nbsp;|->`rpcAddr, err := sc.d.Get(<load_balancing_mode>)` -> `d.Refresh()` and `d.MultiServersDiscovery.Get(mode)`<br>
+&nbsp;&nbsp;|->`xc.call(rpcAddr)` -> `xc.dial(rpcAddr, ctx, serviceMethod, args, Reply)` -> `client = XDial(rpcAddr, xc.opt)` then `client.Call()` <br>
+__For broadcast__: <br>
+`xc.Broadcast()` <br>
+&nbsp;&nbsp;|<br>
+&nbsp;&nbsp;|->`servers, err := xc.d.GetAll()` -> `d.Refresh()` and `d.MultiServersDiscovery.GetAll()`<br>
+&nbsp;&nbsp;|-> for each server in servers: if `reply` is not `nil`: `clonedReply = reflect.New(reflect.ValueOf(reply).Elem().Type()).Interface()`, `xc.call(rpcAddr, ctx, serviceMethod, args, clonedReply)`, and `reflect.ValueOf(reply).Elem().Set(reflect.ValueOf(clonedReply).Elem())`
+
