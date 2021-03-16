@@ -44,7 +44,8 @@ WaitGroup's things, `Add()`, `Done()` and `Wait()`, and `go client.Call()` -> `c
 
 ## Day 3: Service Call using Reflect <br> ## 
 Places that need modification<br>
-1. `startServer()` -> `geerpc.Register(&service_name)` -> `server.Register()` -> `newServer()` -> `service.registerMethods()` -> check `isExportedOrBuiltinType()`
+1. `startServer()` -> `geerpc.Register(&service_name)` -> `server.Register()` -> `newServer()` -> `service.registerMethods()` -> check `isExportedOrBuiltinType()`<br>
+Then in `server.serveCodec()`: <br>
 2. `server.ReadRequest()` -> `req.svc, req.mtype, err = server.findService(h.ServiceMethod)`, `req.argv = req.mtype.newArgv()`, `req.replyv = req.mtype.newReplyv()`, `argvi := req.argv.Interface()` and finally `cc.ReadBody(argvi)`
 3. `server.handleRequest()` -> `req.svc.call(req.mtype, req.argv, req.replyv)` -> `service.call()`
 
