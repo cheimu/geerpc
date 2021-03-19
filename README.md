@@ -67,7 +67,7 @@ _For Server side timeouts_:<br>
 In `server.handleRequest()` uses two signals, `called` and `sent`. `called` indicates that started a goroutine to call and `req.svc.call(req.mtype, req.argv, req.replyv)` is executed but `server.sendResponse()` isn't, while `sent` incidates `server.sendResponse()` is executed.<br>
 Then do select technique described above using `time.After(timeout)`
 
-## Day 5: Handle Timeouts <br> ##
+## Day 5: Support HTTP <br> ##
 The idea is Client side treats server as HTTP server and send `CONNECT` request, then Server side will return a HTTP response to indicate the success of connection. Then each message in HTTP will be hijacked by GeeRPC and executed.<br>
 Then when dial, call `XDial()` which will choose to `DialHTTP()` or `Dial()`
 
@@ -83,7 +83,7 @@ Then when dial, call `XDial()` which will choose to `DialHTTP()` or `Dial()`
         &nbsp;&nbsp;|->`xc := xclient.NewXClient(d, xclient.<load_balancing_mode>, nil)`<br>
         
 __For single call__: <br>
-`xc.Call()` -> `rpcAddr, err := sc.d.Get(<load_balancing_mode>)` then `xc.call(rpcAddr)` -> `xc.dial(rpcAddr, ctx, serviceMethod, args, Reply)` -> `client = XDial(rpcAddr, xc.opt)` then `client.Call()` <br>
+`xc.Call()` -> `rpcAddr, err := xc.d.Get(<load_balancing_mode>)` then `xc.call(rpcAddr)` -> `xc.dial(rpcAddr, ctx, serviceMethod, args, Reply)` -> `client = XDial(rpcAddr, xc.opt)` then `client.Call()` <br>
 __For broadcast__: <br>
 `xc.Broadcast()` -> `servers, err := xc.d.GetAll()`, then for each server in servers: if `reply` is not nil: `clonedReply = reflect.New(reflect.ValueOf(reply).Elem().Type()).Interface()`, `xc.call(rpcAddr, ctx, serviceMethod, args, clonedReply)`, and `reflect.ValueOf(reply).Elem().Set(reflect.ValueOf(clonedReply).Elem())`
 
